@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Network Security Flashcards</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .stats {
+            background: rgba(255,255,255,0.2);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+            color: white;
+            backdrop-filter: blur(10px);
+            display: flex; /* Added for layout */
+            justify-content: space-around; /* Added for layout */
+            align-items: center; /* Added for layout */
+            flex-wrap: wrap; /* Added for responsiveness */
+        }
+
+        .flashcard-container {
+            perspective: 1000px;
+            margin-bottom: 30px;
+        }
+
+        .flashcard {
+            position: relative;
+            width: 100%;
+            height: 400px;
+            transition: transform 0.6s, filter 0.3s ease; /* Added filter for smooth transition */
+            transform-style: preserve-3d;
+            cursor: pointer;
+        }
+
+        .flashcard.flipped {
+            transform: rotateY(180deg);
+        }
+
+        .flashcard.memorized-card { /* New style for memorized cards */
+            filter: grayscale(80%); /* Apply grayscale filter */
+        }
+
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .card-front {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: white;
+        }
+
+        .card-back {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            color: white;
+            transform: rotateY(180deg);
+        }
+
+        .card-content {
+            font-size: 1.2rem;
+            line-height: 1.6;
+        }
+
+        .card-front .card-content {
+            font-weight: 600;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #9b59b6, #8e44ad);
+            color: white;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            color: white;
+        }
+
+        .btn-memorized { /* New style for memorized button */
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-btn {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 4px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff6b6b, #ee5a24);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        .category-filter {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 8px 16px;
+            border: 2px solid rgba(255,255,255,0.3);
+            background: rgba(255,255,255,0.1);
+            color: white;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .filter-btn.active, .filter-btn:hover {
+            background: rgba(255,255,255,0.3);
+            border-color: rgba(255,255,255,0.6);
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .flashcard {
+                height: 350px;
+            }
+            
+            .card-content {
+                font-size: 1rem;
+            }
+            
+            .controls {
+                gap: 10px;
+            }
+            
+            .btn {
+                padding: 10px 16px;
+                font-size: 0.9rem;
+            }
+            .stats {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔐 Network Security Flashcards</h1>
+            <p>Study guide for Information Security, Networking & Cryptography</p>
+        </div>
+
+        <div class="stats">
+            <div>Card <span id="current-card">1</span> of <span id="total-cards">0</span></div>
+            <div id="category-display"></div>
+            <div>Memorized: <span id="memorized-count">0</span> (<span id="memorized-percentage">0</span>%)</div>
+        </div>
+
+        <div class="progress-bar">
+            <div class="progress-fill" id="progress-fill"></div>
+        </div>
+
+        <div class="category-filter">
+            <button class="filter-btn active" data-category="all">All Cards</button>
+            <button class="filter-btn" data-category="info-security">Info Security</button>
+            <button class="filter-btn" data-category="networking">Networking</button>
+            <button class="filter-btn" data-category="cryptography">Cryptography</button>
+            <button class="filter-btn" data-category="attacks">Attacks</button>
+        </div>
+
+        <div class="flashcard-container">
+            <div class="flashcard" id="flashcard">
+                <div class="card-face card-front">
+                    <div class="card-content" id="question"></div>
+                </div>
+                <div class="card-face card-back">
+                    <div class="card-content" id="answer"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button class="btn btn-primary" onclick="flipCard()">Flip Card</button>
+            <button class="btn btn-secondary" onclick="shuffleCards()">Shuffle</button>
+            <button class="btn btn-memorized" onclick="toggleMemorized()">Mark Memorized</button> <button class="btn btn-success" onclick="resetCards()">Reset All</button>
+        </div>
+
+        <div class="navigation">
+            <button class="btn nav-btn" onclick="previousCard()">← Previous</button>
+            <span style="color: white; font-weight: 600;">Click card to flip</span>
+            <button class="btn nav-btn" onclick="nextCard()">Next →</button>
+        </div>
+    </div>
+
+    <script>
+        const flashcards = [
+            // Information Security Basics
+            { question: "What is Information Security?", answer: "Protection of information and its critical elements, including systems and hardware that use, store, and transmit information.", category: "info-security", memorized: false },
+            { question: "What are the layers of security?", answer: "Network security (protect components/connections), Physical security (protect items/areas), Personal security (protect people), Operations security (protect activities), Communications security (protect media/technology)", category: "info-security", memorized: false },
+            { question: "Define 'Asset' in information security context", answer: "An organizational resource being protected", category: "info-security", memorized: false },
+            { question: "What is a Threat?", answer: "An entity presenting danger to an asset", category: "info-security", memorized: false },
+            { question: "Define Vulnerability", answer: "A weakness or fault in a system that opens up the possibility of attack or damage", category: "info-security", memorized: false },
+            { question: "What is Risk in information security?", answer: "The probability that something unwanted will happen", category: "info-security", memorized: false },
+            
+            // CIA Triad
+            { question: "What does the C.I.A. triad stand for?", answer: "Confidentiality, Integrity, and Availability - the original basis of computer security", category: "info-security", memorized: false },
+            { question: "Define Confidentiality", answer: "Protection from disclosure to unauthorized individuals or systems", category: "info-security", memorized: false },
+            { question: "Define Integrity (information security)", answer: "Information remains whole, complete, and uncorrupted", category: "info-security", memorized: false },
+            { question: "Define Availability", answer: "The ability to access information without obstruction", category: "info-security", memorized: false },
+            { question: "What is Authenticity?", answer: "Quality or state of being genuine", category: "info-security", memorized: false },
+            
+            // Networking Fundamentals
+            { question: "What is the difference between a Channel and a Circuit?", answer: "Channel: One-way flow of information from sender to receiver. Circuit: Two-way flow of information", category: "networking", memorized: false },
+            { question: "What is Modulation?", answer: "Modification of a medium to carry the message", category: "networking", memorized: false },
+            { question: "What are the three signal characteristics used in analog transmission?", answer: "Amplitude, frequency, and phase", category: "networking", memorized: false },
+            { question: "Define Frequency Division Multiplexing (FDM)", answer: "A technique where total bandwidth is divided into non-overlapping frequency bands, each carrying a separate signal. Used in analog communications.", category: "networking", memorized: false },
+            { question: "Define Time Division Multiplexing (TDM)", answer: "A method of transmitting independent signals over a common path where each signal appears only a fraction of time in alternating pattern. Used in digital communications.", category: "networking", memorized: false },
+            
+            // Network Types
+            { question: "What defines a Local Area Network (LAN)?", answer: "A network with less than three miles of total cabling", category: "networking", memorized: false },
+            { question: "What is a Wide Area Network (WAN)?", answer: "A very large network covering large geographic regions like states, countries, or even the planet. Examples: public telephone network and Internet", category: "networking", memorized: false },
+            { question: "What is Network Topology?", answer: "The pattern of association among network components", category: "networking", memorized: false },
+            
+            // OSI Model
+            { question: "How many layers does the OSI Reference Model have?", answer: "Seven distinct layers, each with specific functions and protocols", category: "networking", memorized: false },
+            { question: "What is the primary function of the Physical Layer?", answer: "To place transmission signal onto media and establish/terminate physical and logical media connections", category: "networking", memorized: false },
+            { question: "What does the Data Link Layer provide?", answer: "Addressing, packetizing, media access control, error control, and some flow control. It's the primary layer for networking support.", category: "networking", memorized: false },
+            { question: "What are the key functions of the Network Layer?", answer: "Packetizing (organizing segments into packets), Addressing (using dotted decimal notation), and Routing (moving packets across multiple networks)", category: "networking", memorized: false },
+            { question: "What does the Transport Layer provide?", answer: "Reliable transfer of data between user applications using TCP or UDP, error control, and flow control", category: "networking", memorized: false },
+            
+            // TCP/IP Model
+            { question: "What are the four layers of the TCP/IP Model?", answer: "Link (Physical), Internet, Transport, and Application layers", category: "networking", memorized: false },
+            { question: "What does the Internet layer in TCP/IP handle?", answer: "Communication between independent networks, host addressing and identification, packet routing, and uses IP Protocol with IP addresses", category: "networking", memorized: false },
+            
+            // Cryptography Basics
+            { question: "What does 'Cryptography' mean?", answer: "From Greek words 'kryptos' (hidden) and 'graphein' (to write) - the practice of protecting and verifying transmitted information", category: "cryptography", memorized: false },
+            { question: "What is Encryption?", answer: "Process of converting an original message into a form unreadable by unauthorized individuals", category: "cryptography", memorized: false },
+            { question: "What is a Cipher or Cryptosystem?", answer: "An encryption method encompassing the algorithm, key(s), and procedures used to perform encryption and decryption", category: "cryptography", memorized: false },
+            { question: "Define Plaintext vs Ciphertext", answer: "Plaintext: Original unencrypted message. Ciphertext: The encoded/encrypted message", category: "cryptography", memorized: false },
+            { question: "What is Nonrepudiation?", answer: "Verification that a message was sent by a particular sender and cannot be refuted", category: "cryptography", memorized: false },
+            
+            // Cipher Methods
+            { question: "What are the two main cipher methods?", answer: "Bit stream method (transforms each bit one at a time using XOR) and Block cipher method (divides message into blocks, transforms each block)", category: "cryptography", memorized: false },
+            { question: "What is a Substitution Cipher?", answer: "One value substituted for another. Can be monoalphabetic (one alphabet) or polyalphabetic (two or more alphabets)", category: "cryptography", memorized: false },
+            { question: "What is a Transposition Cipher?", answer: "Rearranges values within a block to create ciphertext, can work at bit level or byte level", category: "cryptography", memorized: false },
+            
+            // Hash Functions
+            { question: "What is a Hash Function?", answer: "Mathematical algorithm that generates a message summary/digest to confirm message identity and integrity. Same message always provides same hash value.", category: "cryptography", memorized: false },
+            { question: "What is Hash Salting?", answer: "Process of providing a non-secret random piece of data to the hashing function when the hash is first calculated, protecting against rainbow table attacks", category: "cryptography", memorized: false },
+            { question: "What is a Rainbow Table?", answer: "A database of precomputed hashes from sequentially calculated passwords, used in time-memory trade-off attacks", category: "cryptography", memorized: false },
+            
+            // Symmetric vs Asymmetric Encryption
+            { question: "What is Symmetric Encryption?", answer: "Uses the same secret key to encrypt and decrypt the message. Also called private key encryption. Challenge: getting the key to receiver securely.", category: "cryptography", memorized: false },
+            { question: "What is Asymmetric Encryption?", answer: "Uses two different keys - either key can encrypt/decrypt. Commonly uses one public and one private key. Public keys shared in directories, private keys kept secret.", category: "cryptography", memorized: false },
+            { question: "What is DES and why is it weak?", answer: "Data Encryption Standard: 56-bit key, 64-bit block size. Key length insufficient - Electronic Frontier Foundation broke DES key in 56 hours (1998).", category: "cryptography", memorized: false },
+            { question: "What is AES?", answer: "Advanced Encryption Standard using Rijndael Block Cipher. Variable block length, key lengths of 128/192/256 bits. Would take 4,698,864 quintillion years to crack.", category: "cryptography", memorized: false },
+            { question: "What is RSA?", answer: "Popular asymmetric key cryptosystem developed in 1977 by Rivest, Shamir, and Adleman", category: "cryptography", memorized: false },
+            
+            // Security Protocols
+            { question: "What is IPSec?", answer: "Open-source protocol that secures communications across IP networks. Often used for VPNs. Has Transport mode (encrypt data only) and Tunnel mode (encrypt entire packet).", category: "cryptography", memorized: false },
+            { question: "What is SSH?", answer: "Secure Shell - protocol for secure access over insecure medium. Commonly used for UNIX/Linux system shells, replaces Telnet.", category: "cryptography", memorized: false },
+            { question: "What is HTTPS?", answer: "HTTP Secured - uses TLS/SSL encryption. Provides authentication, privacy protection, and guards against man-in-the-middle attacks.", category: "cryptography", memorized: false },
+            { question: "Compare WEP vs WPA", answer: "WEP: Early 802.11 security, considered weak. WPA: Created to resolve WEP issues, 128-bit keys, uses dynamically changing keys via TKIP.", category: "cryptography", memorized: false },
+            
+            // PKI and Digital Certificates
+            { question: "What is PKI?", answer: "Public Key Infrastructure - integrated system of software, services, and encryption including Certificate Authorities (CA) that issue digital certificates", category: "cryptography", memorized: false },
+            { question: "What is a Digital Certificate?", answer: "Electronic document/container file holding key value and identifying information about key owner. Often issued by trusted third party (CA).", category: "cryptography", memorized: false },
+            { question: "What is a Digital Signature?", answer: "Encrypted message that can be mathematically proven authentic using asymmetric encryption", category: "cryptography", memorized: false },
+            
+            // Common Attacks
+            { question: "What is a Denial of Service (DoS) attack?", answer: "Attacker sends large number of requests to target system, causing it to crash or be unable to handle legitimate requests", category: "attacks", memorized: false },
+            { question: "What is IP Spoofing?", answer: "Technique to gain unauthorized access by sending messages with fake IP address of a trusted host, modifying packet headers", category: "attacks", memorized: false },
+            { question: "What is a Man-in-the-Middle attack?", answer: "Attacker monitors network packets, modifies them using IP spoofing, and inserts them back. Can eavesdrop, modify, reroute, forge, or divert data.", category: "attacks", memorized: false },
+            { question: "What is Social Engineering?", answer: "Process of using social skills to convince people to reveal access credentials, usually involving impersonation", category: "attacks", memorized: false },
+            { question: "What is a Buffer Overflow?", answer: "Application error occurring when more data is sent to a buffer than it can handle. Attackers can exploit the failure consequences.", category: "attacks", memorized: false },
+            { question: "What is Shoulder Surfing?", answer: "Observing passwords of others by looking over their shoulder or watching them type", category: "attacks", memorized: false },
+            { question: "What are Script Kiddies?", answer: "Hackers of limited skill who use expertly written software to attack systems", category: "attacks", memorized: false },
+            { question: "What is a Sniffer?", answer: "Program or device monitoring data traveling over a network. Can be used legitimately or for stealing information including passwords.", category: "attacks", memorized: false },
+            
+            // Password Attacks
+            { question: "What is a Brute Force attack?", answer: "Trying every possible combination to crack passwords", category: "attacks", memorized: false },
+            { question: "What is a Dictionary Attack?", answer: "Attacker encrypts every word in dictionary using same cryptosystem as target, looking for matches. Successful with small files like password files.", category: "attacks", memorized: false },
+            
+            // Malicious Code
+            { question: "What is a Polymorphic Worm?", answer: "State-of-the-art malicious code that uses several attack vectors to exploit variety of vulnerabilities", category: "attacks", memorized: false },
+            { question: "What is the difference between Virus, Worm, and Trojan Horse?", answer: "Virus: Attaches to files. Worm: Self-replicating, spreads without user action. Trojan Horse: Appears legitimate but contains malicious code.", category: "attacks", memorized: false },
+            
+            // Security Policies
+            { question: "What is an Enterprise Information Security Policy (EISP)?", answer: "Executive-level document that supports organization's mission/vision, guides security program, and addresses legal compliance", category: "info-security", memorized: false },
+            { question: "What is an Issue-Specific Security Policy (ISSP)?", answer: "States organization's position on specific issues like email use, network use, hacking prohibitions, personal equipment use", category: "info-security", memorized: false },
+            { question: "What criteria make a policy effective?", answer: "Dissemination, Review, Comprehension, Compliance, and Uniformity", category: "info-security", memorized: false }
+        ];
+
+        let currentCardIndex = 0;
+        let currentCategory = 'all';
+        let filteredCards = []; // Initialize as empty, will be populated by filterCards
+        let isFlipped = false;
+
+        function initializeCards() {
+            // Initially populate filteredCards with all flashcards
+            filterCards('all'); 
+            updateCardDisplay();
+            updateStats();
+            updateProgress();
+        }
+
+        function filterCards(category) {
+            currentCategory = category;
+            currentCardIndex = 0;
+            
+            if (category === 'all') {
+                filteredCards = [...flashcards];
+            } else {
+                filteredCards = flashcards.filter(card => card.category === category);
+            }
+            
+            // Update filter buttons
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector(`[data-category="${category}"]`).classList.add('active');
+            
+            updateCardDisplay();
+            updateStats();
+            updateProgress();
+            
+            if (isFlipped) {
+                flipCard();
+            }
+        }
+
+        function updateCardDisplay() {
+            const flashcardElement = document.getElementById('flashcard');
+            if (filteredCards.length === 0) {
+                document.getElementById('question').textContent = "No cards found for this category.";
+                document.getElementById('answer').textContent = "";
+                flashcardElement.classList.remove('memorized-card'); // Ensure no grayscale
+                return;
+            }
+            
+            const card = filteredCards[currentCardIndex];
+            document.getElementById('question').textContent = card.question;
+            document.getElementById('answer').textContent = card.answer;
+
+            // Update the "Mark Memorized" button text based on current card's memorized status
+            const markMemorizedBtn = document.querySelector('.btn-memorized');
+            if (card.memorized) {
+                markMemorizedBtn.textContent = "Unmark Memorized";
+                flashcardElement.classList.add('memorized-card'); // Add grayscale
+            } else {
+                markMemorizedBtn.textContent = "Mark Memorized";
+                flashcardElement.classList.remove('memorized-card'); // Remove grayscale
+            }
+        }
+
+        function updateStats() {
+            document.getElementById('current-card').textContent = currentCardIndex + 1;
+            document.getElementById('total-cards').textContent = filteredCards.length;
+            
+            const categoryNames = {
+                'all': 'All Categories',
+                'info-security': 'Information Security',
+                'networking': 'Networking',
+                'cryptography': 'Cryptography',
+                'attacks': 'Attacks & Threats'
+            };
+            
+            document.getElementById('category-display').textContent = categoryNames[currentCategory];
+
+            // Calculate memorized stats
+            const memorizedCards = flashcards.filter(card => card.memorized).length;
+            const totalFlashcards = flashcards.length;
+            const memorizedPercentage = totalFlashcards > 0 ? ((memorizedCards / totalFlashcards) * 100).toFixed(1) : 0;
+
+            document.getElementById('memorized-count').textContent = memorizedCards;
+            document.getElementById('memorized-percentage').textContent = memorizedPercentage;
+        }
+
+        function updateProgress() {
+            const progress = (filteredCards.length > 0) ? ((currentCardIndex + 1) / filteredCards.length) * 100 : 0;
+            document.getElementById('progress-fill').style.width = progress + '%';
+        }
+
+        function flipCard() {
+            const flashcard = document.getElementById('flashcard');
+            flashcard.classList.toggle('flipped');
+            isFlipped = !isFlipped;
+        }
+
+        function nextCard() {
+            if (filteredCards.length === 0) return;
+
+            if (currentCardIndex < filteredCards.length - 1) {
+                currentCardIndex++;
+            } else {
+                currentCardIndex = 0; // Loop back to first card
+            }
+            
+            if (isFlipped) {
+                flipCard();
+            }
+            
+            updateCardDisplay();
+            updateStats();
+            updateProgress();
+        }
+
+        function previousCard() {
+            if (filteredCards.length === 0) return;
+
+            if (currentCardIndex > 0) {
+                currentCardIndex--;
+            } else {
+                currentCardIndex = filteredCards.length - 1; // Loop to last card
+            }
+            
+            if (isFlipped) {
+                flipCard();
+            }
+            
+            updateCardDisplay();
+            updateStats();
+            updateProgress();
+        }
+
+        function shuffleCards() {
+            for (let i = filteredCards.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [filteredCards[i], filteredCards[j]] = [filteredCards[j], filteredCards[i]];
+            }
+            
+            currentCardIndex = 0;
+            
+            if (isFlipped) {
+                flipCard();
+            }
+            
+            updateCardDisplay();
+            updateStats();
+            updateProgress();
+        }
+
+        function toggleMemorized() {
+            if (filteredCards.length === 0) return;
+
+            const currentCard = filteredCards[currentCardIndex];
+            currentCard.memorized = !currentCard.memorized;
+            updateStats(); // Update the memorized count and percentage
+            updateCardDisplay(); // Update the button text and apply/remove grayscale
+
+            // Automatically pull the next card if marked as memorized
+            if (currentCard.memorized) {
+                nextCard();
+            }
+        }
+
+        function resetCards() {
+            // Reset all memorized flags to false
+            flashcards.forEach(card => {
+                card.memorized = false;
+            });
+            currentCardIndex = 0;
+            filterCards('all'); // Re-filter to 'all' to ensure all cards are visible
+            
+            if (isFlipped) {
+                flipCard();
+            }
+        }
+
+        // Event listeners
+        document.getElementById('flashcard').addEventListener('click', flipCard);
+
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                filterCards(e.target.dataset.category);
+            });
+        });
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            switch(e.key) {
+                case ' ':
+                case 'Enter':
+                    e.preventDefault();
+                    flipCard();
+                    break;
+                case 'ArrowRight':
+                case 'n':
+                    e.preventDefault();
+                    nextCard();
+                    break;
+                case 'ArrowLeft':
+                case 'p':
+                    e.preventDefault();
+                    previousCard();
+                    break;
+                case 's':
+                    e.preventDefault();
+                    shuffleCards();
+                    break;
+                case 'm': // 'm' for mark memorized
+                    e.preventDefault();
+                    toggleMemorized();
+                    break;
+                case 'r':
+                    e.preventDefault();
+                    resetCards();
+                    break;
+            }
+        });
+
+        // Initialize the app
+        initializeCards();
+    </script>
+</body>
+</html>
